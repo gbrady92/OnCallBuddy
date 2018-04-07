@@ -1,0 +1,13 @@
+version: '3'
+services:
+  web-server:
+    volumes:
+      - .:/code
+    build: .
+    command: ["flask", "run", "--port", "8080", "--host", "0.0.0.0"]
+    ports:
+      - "8080:8080"
+    environment:
+      - FLASK_APP=app.py
+      - OAUTHLIB_INSECURE_TRANSPORT=1
+
