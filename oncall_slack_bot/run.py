@@ -1,7 +1,9 @@
 from datetime import datetime, timedelta
 import calendar
+import json
 
 from google_cal import api
+from slack import api as slack_api
 
 CALENDAR_IDS = api.get_calendar_ids()
 
@@ -42,3 +44,21 @@ def get_engineers_on_call():
         parse_and_store_event(rota, event)
 
     return rota
+
+
+def run_on_call_bot():
+    oncall_rota = get_engineers_on_call()
+    # on_call_engineer_names = oncall_rota.keys()
+    on_call_engineer_names = ['Gareth Brady']
+    on_call_engineer_slack_ids = {
+        name: slack_api.get_slack_user_by_name(name)
+        for name in on_call_engineer_names
+    }
+
+    for name, slack_id in on_call_engineer_slack_ids.iteritems():
+        message = 'Hi, You are on call these dates this month: \n'
+        for date_range in oncall_rota[name]:
+            message += "{} - {} \n".format(
+                date_range[0].strftime("%d-%m-%Y"),
+                date_range[1].strftime("%d-%m-%Y"))
+        slack_api.private_message_user(slack_id, message)
